@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "api_version": "v23.0",
+  "graduation": "SS_PERFORMANCE",
+  "auto_top_n": 20,
+  "min_views_for_auto": 5000,
+  "min_days_between_reposts": 3,
+  "evaluate_after_hours": 48,
+  "max_posts_per_generation": 5,
+  "burn_ratio": 0.5,
+  "max_generations": 3,
+  "insights_calls_per_sync": 150
+}
