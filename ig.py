@@ -17,12 +17,16 @@ class IGError(Exception):
 
 
 class Instagram:
-    def __init__(self, token, version="v23.0"):
+    def __init__(self, token, version="v23.0", ig_user_id=None):
+        """ig_user_id given: a Unified-login system-user token, served from graph.facebook.com
+        (newer Meta apps get only this setup). Otherwise an Instagram-login token."""
         self.token = token
         self.version = version
-        self.base = f"https://graph.instagram.com/{version}"
+        self.system_user = bool(ig_user_id)
+        host = "graph.facebook.com" if self.system_user else "graph.instagram.com"
+        self.base = f"https://{host}/{version}"
         self.supported_metrics = None
-        self._user_id = None
+        self._user_id = ig_user_id
 
     def _req(self, method, path, **params):
         url = path if path.startswith("http") else f"{self.base}/{path}"
@@ -46,6 +50,8 @@ class Instagram:
 
     def refresh_token(self):
         """Extends a long-lived token by another 60 days. Returns the new token."""
+        if self.system_user:  # system-user tokens never expire
+            return self.token
         data = self._req("GET", "https://graph.instagram.com/refresh_access_token",
                          grant_type="ig_refresh_token")
         self.token = data["access_token"]
@@ -55,7 +61,7 @@ class Instagram:
 
     def list_reels(self):
         fields = "id,caption,media_type,media_product_type,permalink,timestamp"
-        data = self._req("GET", "me/media", fields=fields, limit=100)
+        data = self._req("GET", f"{self.user_id()}/media", fields=fields, limit=100)
         out = []
         while True:
             out += [m for m in data.get("data", []) if m.get("media_product_type") == "REELS"]

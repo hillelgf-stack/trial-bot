@@ -90,7 +90,7 @@ def get_client(state):
     if tok.get("seed") != seed_hash:
         tok = {"seed": seed_hash, "value": seed, "refreshed_at": iso(now())}
         state["token"] = tok
-    ig = Instagram(tok["value"], CONFIG["api_version"])
+    ig = Instagram(tok["value"], CONFIG["api_version"], os.environ.get("IG_USER_ID") or None)
     if hours_since(tok.get("refreshed_at")) > 24 * 7 and not DRY_RUN:
         try:
             tok["value"] = ig.refresh_token()
